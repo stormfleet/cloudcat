@@ -1,6 +1,6 @@
 # CloudCat
 ## Description
-An Python script using an Ansible base to automate the creation and deletion of AWS EC2 instances for cloud-based password cracking!
+A Python script using an Ansible base to automate the creation and deletion of AWS EC2 instances for cloud-based password cracking!
 
 Building and maintaing your own crackstation is fun, but can be seriously time consuming. If you're penetration testing or red teaming and you've captured some NTLMv2 hashes or an SPN, sometimes you need results quick.
 
