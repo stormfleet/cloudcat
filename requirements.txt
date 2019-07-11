@@ -1,0 +1,3 @@
+boto
+botocore
+boto3
