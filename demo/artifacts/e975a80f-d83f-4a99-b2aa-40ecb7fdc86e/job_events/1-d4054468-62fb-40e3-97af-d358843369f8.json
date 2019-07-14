@@ -1,1 +1,0 @@
-{"uuid": "d4054468-62fb-40e3-97af-d358843369f8", "stdout": "\u001b[0;31mERROR! the playbook: mode=1300 could not be found\u001b[0m", "counter": 1, "end_line": 1, "runner_ident": "e975a80f-d83f-4a99-b2aa-40ecb7fdc86e", "start_line": 0, "event": "verbose"}

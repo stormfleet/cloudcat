@@ -1,1 +1,0 @@
-{"uuid": "03af97ce-cad7-4505-af3b-c1aaecabd9d4", "stdout": "\u001b[0;31mERROR! the playbook: creation.yml could not be found\u001b[0m", "counter": 1, "end_line": 1, "runner_ident": "5cd558db-67be-4da9-8021-366796f471a4", "start_line": 0, "event": "verbose"}
