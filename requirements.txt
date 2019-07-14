@@ -1,3 +1,4 @@
 boto
 botocore
 boto3
+ansible
