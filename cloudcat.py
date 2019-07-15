@@ -24,18 +24,10 @@ def parse_args():
 
 def main():
     args = parse_args()
-    array = ['ansible-playbook', 'creation.yml']
-    ops = ['-e']
-    ops.append('\'size=' + args.size)
-    ops.append('file=' + args.file)
-    ops.append('mode=' + args.mode + '\'')
-    #ops.append('\'{\"size\":\"' + args.size + '\"')
-    #ops.append(',\"file\":\"' + args.file + '\"')
-    #ops.append(',\"mode\":\"' + args.mode + '\"}\'')
+    array = ['ansible-playbook', 'creation.yml', '-e']
+    ops = ["size={} file={} mode={}".format(args.size,args.file,args.mode)]
     array.extend(ops)
-    full = ' '.join(array)
-    print(full)
-    subprocess.call(full, shell=True)
+    subprocess.call(array)
 
 if __name__ == "__main__":
     banner()
