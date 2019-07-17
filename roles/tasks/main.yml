@@ -1,0 +1,122 @@
+---
+- name: Mounting wordlist volume
+  block:
+    - file:
+        path: /newvolume/
+        state: directory
+        mode: '0666'
+    - mount:
+
+
+    - debug:
+        msg: "Mounting the volume was successful!"
+
+## END: Tasks to do with mounting wordlists & rules
+## 
+## START: Tasks to do with preparing Hashcat & cracking
+
+- name: Updating packages
+  apt:
+    update_cache: yes
+    upgrade: yes
+
+- name: Checking kernel version for Linux headers
+  command: uname -r
+  register: version
+
+- debug:
+    msg: "Kernel version is {{ version.stdout }}"
+
+- name: Downloading packages for Hashcat...
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - build-essential
+    - "linux-headers-{{ version.stdout }}"
+    - linux-image-extra-virtual
+
+######################## SORT THIS OUT ############################
+
+- name: Blacklisting kernel modules
+  blockinfile:
+    create: yes
+    path: /etc/modprobe.d/blacklist-nouveau.conf
+    insertafter: EOF
+    block: |
+      blacklist nouveau
+      blacklist lbm-nouveau
+      options nouveau modeset=0
+      alias nouveau off
+      alias lbm-nouveau off
+
+- name: Modifying nouveau-kms.conf
+  lineinfile:
+    create: yes
+    path: /etc/modprobe.d/nouveau-kms.conf
+    state: present
+    insertafter: EOF
+    line: "options nouveau modeset=0"
+
+- name: Updating initramfs
+  command: "update-initramfs -u"
+
+- debug:
+    msg: "Moving to reboot now..."
+
+- name: Rebooting server to apply changes
+  reboot:
+
+- debug:
+    msg: "Reboot successful..."
+
+- name: Downloading Hashcat and NVIDIA drivers
+  block:
+    - name: NVIDIA drivers
+      get_url:
+        url: http://us.download.nvidia.com/tesla/410.104/NVIDIA-Linux-x86_64-410.104.run
+        dest: /opt/
+        mode: '0555'
+    - name: Hashcat
+      get_url:
+        url: https://hashcat.net/files/hashcat-5.1.0.tar.gz
+        dest: /opt/
+        mode: '0666'
+
+- name: Installing NVIDIA drivers
+  command: "/bin/bash NVIDIA-Linux-x86_64-410.104.run --ui=none --no-questions --silent -X"
+  args:
+    chdir: /opt/
+
+- name: Extracting Hashcat to /opt/ directory
+  unarchive:
+    remote_src: yes
+    src: /opt/hashcat-5.1.0.tar.gz
+    dest: /opt/
+
+- name: Compiling Hashcat
+  command: make
+  args:
+    chdir: /opt/hashcat-5.1.0
+
+- name: Copying hashes for cracking
+  block:
+    - file:
+        path: /opt/hashes/
+        state: directory
+        mode: '0755'
+    - copy:
+        src: "{{ hashfile }}"
+        dest: /opt/hashes/
+        owner: root
+        group: root
+        mode: 0666
+
+- name: Executing hashcat against hashfile
+  command: "./hashcat -a 0 -w "
+  args:
+    chdir: /opt/hashcat/hashcat-5.1.0
+  register: benchmark
+
+- debug:
+    msg: "Here are the benchmark results {{ benchmark.stdout_lines }}"

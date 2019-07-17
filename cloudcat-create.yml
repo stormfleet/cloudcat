@@ -1,0 +1,116 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    access: 
+    secret: 
+    name: cloudcat-cracker 
+    region: 
+    type: 
+    ssh_key: 
+    group:
+
+  tasks:
+    - name: Gathering local facts
+
+      # > Get local public IPv4 address
+      # > Check if SSH key is generated for the account
+      #         > Does the user have a prexisting key?
+      # > Check if user wants to have access from a 'home' IP address as well as current IP address
+      # > 
+      # > Does snapshot exist with wordlists?
+      #         > If no, create t2 instance of some kind
+      #         > Attach & format volume & download wordlists
+      #         > Snapshot volume
+      #         > Unmount volume
+      #         > Destroy volume & EC2 instance
+      # > If snapshot exists, great
+      # > Create EC2 instance
+      # > Attach volume
+      # > Perform setup for cracking
+      # > Copy file specified by user to the hashcat directory
+      # > Perform cracking!
+      # > Print execution output to screen
+      # > Read cracked file
+      # 
+      # > User input specified during EC2 creation whether shutdown == termination or not
+      # > If not specified, manually unmount volume, destroy volume & terminate instance
+      # 
+      # > Specified user flag if instance is NOT to be destroyed accompanied by warning
+      #
+    - name: Consulting with AWS
+      aws_caller_facts:
+        aws_access_key: "{{ access }}"
+        aws_secret_key: "{{ secret }}"
+      register: caller_facts
+    
+    - name: Checking public IP address of localhost
+      ipify_facts:
+      register: ipify
+
+# Create AWS security group when the localhost is the only IP that needs to interact with the instance
+# OR
+# Create AWS security group when the localhost is one of x IP addresses that need to access the instance
+    - name: Creating AWS security group
+      when: 
+
+    - name: Checking if a wordlist snapshot already exists
+      ec2_snapshot_facts:
+        aws_access_key: "{{ access }}"
+        aws_secret_key: "{{ secret }}"
+        owner_ids:
+          - "{{ caller_facts.account }}"
+      register: snaps
+
+# Creating Cracking instance as normal -> a snapshot should be present. If not, fail, and exit code should return that the cracking startup script should be run
+    - name: Creating EC2 instance
+      when: snaps is defined and
+            snaps is not null
+      ec2_instance:
+        aws_access_key: "{{ access }}"
+        aws_secret_key: "{{ secret }}"
+        name: "{{ name }}"
+        state: present
+        security_group: "{{}}"
+        image_id: "{{}}"
+        instance_type: "{{ type }}"
+        key_name: "{{}}"
+        region: "{{ region }}"
+        wait_timeout: "300"
+        wait: true
+      register: ec2
+
+    - debug:
+        msg: "{{ type }} EC2 instance created. Located at {{ ec2.instance.0.public_ip_address }}"
+      
+    - name: Creating volume from "{{ snaps.snapshots.0.snapshot_id }}"
+      when: snaps is defined and
+            snaps is not null
+      ec2_vol:
+        aws_access_key: "{{ access }}"
+        aws_secret_key: "{{ secret }}"
+        snapshot: "{{ snaps.shapshots.0.snapshot_id }}"
+        region: "{{ region }}"
+        volume_size: "{{}}"
+        volume_type: gp2
+        iops: "300"
+        instance: "{{ ec2.instance.0.instance_id }}"
+    
+    - name: Waiting for live SSH connection to AWS host
+      wait_for:
+        host: "{{ ec2.instances.0.public_ip_address }}"
+        port: 22
+        connect_timeout: 5
+        timeout: 90
+
+    - name: Instance live - adding host to in-memory inventory
+      add_host:
+        host: "{{ ec2.instances.0.public_ip_address }}"
+        group: cloudcat
+        ansible_ssh_private_key_file: "/home/{{ ansible_user_id}}/.ssh/{{ ssh_key_name }}"
+
+- hosts: cloudcat
+  remote_user: ubuntu
+  become: true
+  roles:
+    - role: taskcat
