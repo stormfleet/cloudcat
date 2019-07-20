@@ -2,8 +2,8 @@
 - hosts: localhost
   connection: local
   vars:
-    access: 
-    secret: 
+    access: redacted 
+    secret: redacted
     name: cloudcat-cracker 
     region: 
     type: 
@@ -11,8 +11,6 @@
     group:
 
   tasks:
-    - name: Gathering local facts
-
       # > Get local public IPv4 address
       # > Check if SSH key is generated for the account
       #         > Does the user have a prexisting key?
@@ -44,6 +42,10 @@
         aws_secret_key: "{{ secret }}"
       register: caller_facts
     
+    - name: Checking for SSH key
+    
+    - name: Adding SSH key
+
     - name: Checking public IP address of localhost
       ipify_facts:
       register: ipify

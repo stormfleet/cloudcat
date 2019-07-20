@@ -1,20 +1,4 @@
 ---
-- name: Mounting wordlist volume
-  block:
-    - file:
-        path: /newvolume/
-        state: directory
-        mode: '0666'
-    - mount:
-
-
-    - debug:
-        msg: "Mounting the volume was successful!"
-
-## END: Tasks to do with mounting wordlists & rules
-## 
-## START: Tasks to do with preparing Hashcat & cracking
-
 - name: Updating packages
   apt:
     update_cache: yes
@@ -35,8 +19,7 @@
     - build-essential
     - "linux-headers-{{ version.stdout }}"
     - linux-image-extra-virtual
-
-######################## SORT THIS OUT ############################
+    - screen
 
 - name: Blacklisting kernel modules
   blockinfile:
@@ -61,14 +44,35 @@
 - name: Updating initramfs
   command: "update-initramfs -u"
 
-- debug:
-    msg: "Moving to reboot now..."
+- name: Checking if reboot is needed...
+  block:
+    - stat:
+        path: /etc/modprobe.d/blacklist-nouveau.conf
+      register: stat_result
+    - debug:
+      when: stat_result.stat.exists == 
+        msg: "Moving to reboot now..."
 
 - name: Rebooting server to apply changes
   reboot:
+  # ONLY REBOOT SERVER IF IT HASN'T BEEN DONE BEFORE. CHECK THE MODPROBE FILE TO SEE IF THIS MAY HAVE ALREADY BEEN DONE.
 
-- debug:
-    msg: "Reboot successful..."
+####
+#### Post-reboot: Setting up Hashcat
+####
+
+- name: Reboot successful. Mounting wordlist volumes.
+  block:
+    - file:
+        path: /newvolume/
+        state: directory
+        mode: '0666'
+    - mount:
+        path: /newvolume/
+        src: /dev/xvdf
+        opts: bind
+        fstype: none
+        state: mounted
 
 - name: Downloading Hashcat and NVIDIA drivers
   block:
@@ -106,17 +110,50 @@
         state: directory
         mode: '0755'
     - copy:
-        src: "{{ hashfile }}"
+        src: files/hashes.txt
         dest: /opt/hashes/
         owner: root
         group: root
         mode: 0666
 
+####
+#### Hashcat exection statements
+####
+
 - name: Executing hashcat against hashfile
-  command: "./hashcat -a 0 -w "
+  when: short|default(false)
+  command: "./hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /newvolume/rockyou.txt -r /opt/rules/OneRuleToRuleThemAll.rule -o cracked.txt"
   args:
-    chdir: /opt/hashcat/hashcat-5.1.0
-  register: benchmark
+    chdir: /opt/hashcat-5.1.0
+
+- name: Executing hashcat against hashfile
+  when: medium|default(false)
+  command: "./hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /newvolume/rockyou.txt /newvolume/fav_wordlist.lst -r /opt/rules/OneRuleToRuleThemAll.rule -o cracked.txt"
+  args:
+    chdir: /opt/hashcat-5.1.0
+
+- name: Executing hashcat against hashfile
+  when: long|default(false)
+  command: "./hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /newvolume/rockyou.txt /newvolume/fav_wordlist.lst /newvolume/crackstation.lst -r /opt/rules/OneRuleToRuleThemAll.rule -o cracked.txt"
+  args:
+    chdir: /opt/hashcat-5.1.0
+
+####
+#### End of Hashcat execution statements
+####
 
 - debug:
-    msg: "Here are the benchmark results {{ benchmark.stdout_lines }}"
+  when: long|medium|default(false)
+    msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with 'ssh -i ~/.ssh/your-key-here ubuntu@{{ ec2.instances.0.public_ip_address }}"
+
+- name: Cracking complete, reading outfile
+  when: short|default(false)
+  command: "cat /opt/hashcat-5.1.0/cracked.txt"
+  register: cracked
+
+- debug:
+  when: short|default(false)
+    msg: "The following hashes were recovered: {{ cracked.stdout }}"
+
+- debug:
+    msg: "Remote execution complete! Returning to local execution..."
