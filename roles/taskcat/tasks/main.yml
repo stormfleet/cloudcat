@@ -22,46 +22,69 @@
     - screen
 
 - name: Blacklisting kernel modules
-  blockinfile:
-    create: yes
-    path: /etc/modprobe.d/blacklist-nouveau.conf
-    insertafter: EOF
-    block: |
-      blacklist nouveau
-      blacklist lbm-nouveau
-      options nouveau modeset=0
-      alias nouveau off
-      alias lbm-nouveau off
+  block:
+    - copy:
+        src: files/blacklist-nouveau.conf
+        dest: /etc/modprobe.d/
+        owner: root
+        group: root
+        mode: 0666
+    - copy:
+        src: files/nouveau-kms.conf
+        dest: /etc/modprobe.d/
+        owner: root
+        group: root
+        mode: 0666
 
-- name: Modifying nouveau-kms.conf
-  lineinfile:
-    create: yes
-    path: /etc/modprobe.d/nouveau-kms.conf
-    state: present
-    insertafter: EOF
-    line: "options nouveau modeset=0"
+      #- name: Blacklisting kernel modules
+      #  blockinfile:
+      #    create: yes
+      #    path: /etc/modprobe.d/blacklist-nouveau.conf
+      #    insertafter: EOF
+      #    block: |
+      #      blacklist nouveau
+      #      blacklist lbm-nouveau
+      #      options nouveau modeset=0
+      #      alias nouveau off
+      #      alias lbm-nouveau off
+      #
+      #- name: Modifying nouveau-kms.conf
+      #  lineinfile:
+      #    create: yes
+      #    path: /etc/modprobe.d/nouveau-kms.conf
+      #    state: present
+      #    insertafter: EOF
+      #    line: "options nouveau modeset=0"
 
 - name: Updating initramfs
   command: "update-initramfs -u"
 
 - name: Checking if reboot is needed...
   block:
-    - stat:
+    - lineinfile:
         path: /etc/modprobe.d/blacklist-nouveau.conf
-      register: stat_result
+        line: "# rebooted"
+        state: present
+      check_mode: yes
+      register: nouveau
     - debug:
-      when: stat_result.stat.exists == 
         msg: "Moving to reboot now..."
+      when: nouveau.stdout | match("# rebooted")
 
 - name: Rebooting server to apply changes
   reboot:
-  # ONLY REBOOT SERVER IF IT HASN'T BEEN DONE BEFORE. CHECK THE MODPROBE FILE TO SEE IF THIS MAY HAVE ALREADY BEEN DONE.
 
 ####
 #### Post-reboot: Setting up Hashcat
 ####
+- name: Reboot successful. Updating info.
+  lineinfile:
+    path: /etc/modprobe.d/blacklist-nouveau.conf
+    state: present
+    insertafter: EOF
+    line: "# rebooted"
 
-- name: Reboot successful. Mounting wordlist volumes.
+- name: Mounting wordlist volumes.
   block:
     - file:
         path: /newvolume/
@@ -120,6 +143,9 @@
 #### Hashcat exection statements
 ####
 
+# Running things in a detatched screen
+# screen -dmS test bash -c 'echo waiting 5 senconds...; sleep 5; exec bash'
+
 - name: Executing hashcat against hashfile
   when: short|default(false)
   command: "./hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /newvolume/rockyou.txt -r /opt/rules/OneRuleToRuleThemAll.rule -o cracked.txt"
@@ -143,8 +169,8 @@
 ####
 
 - debug:
+    msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@ {{ ec2.instances.0.public_ip_address }}"
   when: long|medium|default(false)
-    msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with 'ssh -i ~/.ssh/your-key-here ubuntu@{{ ec2.instances.0.public_ip_address }}"
 
 - name: Cracking complete, reading outfile
   when: short|default(false)
@@ -152,8 +178,8 @@
   register: cracked
 
 - debug:
+    msg: "The following hashes were recovered {{ cracked.stdout }}"
   when: short|default(false)
-    msg: "The following hashes were recovered: {{ cracked.stdout }}"
 
 - debug:
     msg: "Remote execution complete! Returning to local execution..."
