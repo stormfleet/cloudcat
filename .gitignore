@@ -1,0 +1,5 @@
+# Ignored extensions
+*.retry
+
+# Ignore the external var file
+external_vars.yml
