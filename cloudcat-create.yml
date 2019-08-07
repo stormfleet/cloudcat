@@ -11,33 +11,7 @@
     group:
 
   tasks:
-      # > Get local public IPv4 address
-      # > Check if SSH key is generated for the account
-      #         > Does the user have a prexisting key?
-      # > Check if user wants to have access from a 'home' IP address as well as current IP address
-      # > 
-      # > Does snapshot exist with wordlists?
-      #         > If no, create t2 instance of some kind
-      #         > Attach & format volume & download wordlists
-      #         > Snapshot volume
-      #         > Unmount volume
-      #         > Destroy volume & EC2 instance
-      # > If snapshot exists, great
-      # > Create EC2 instance
-      # > Attach volume
-      # > Perform setup for cracking
-      # > Copy file specified by user to the hashcat directory
-      # > Perform cracking!
-      # > Print execution output to screen
-      # > Read cracked file
-      # 
-      # > User input specified during EC2 creation whether shutdown == termination or not
-      # > If not specified, manually unmount volume, destroy volume & terminate instance
-      # 
-      # > Specified user flag if instance is NOT to be destroyed accompanied by warning
-      #
-    - name: Consulting with AWS
-      aws_caller_facts:
+    - aws_caller_facts:
         aws_access_key: "{{ access }}"
         aws_secret_key: "{{ secret }}"
       register: caller_facts
@@ -83,23 +57,9 @@
             cidr_ip: "{{ guestip }}"
       register: secgroup
 
-    - name: Checking if a wordlist snapshot already exists
-      ec2_snapshot_facts:
-        aws_access_key: "{{ access }}"
-        aws_secret_key: "{{ secret }}"
-        owner_ids:
-          - "{{ caller_facts.account }}"
-      register: snaps
+### END of security group block
 
-    - fail:
-       msg: "No wordlist volume was found. Please run Cloudcat wordlist volume generator first."
-      when: snaps is defined and
-            snaps.state is undefined
-
-# Creating Cracking instance as normal -> a snapshot should be present. If not, fail, and exit code should return that the cracking startup script should be run
     - name: Creating EC2 instance
-      when: snaps is defined and
-            snaps.state is defined
       ec2_instance:
         aws_access_key: "{{ access }}"
         aws_secret_key: "{{ secret }}"
@@ -116,19 +76,9 @@
 
     - debug:
         msg: "{{ type }} EC2 instance created. Located at {{ ec2.instance.0.public_ip_address }}"
-      
-    - name: Creating volume from "{{ snaps.snapshots.0.snapshot_id }}"
-      when: snaps.description == "cloudcat-wordlist"
-      ec2_vol:
-        aws_access_key: "{{ access }}"
-        aws_secret_key: "{{ secret }}"
-        snapshot: "{{ snaps.shapshots.0.snapshot_id }}"
-        region: "{{ region }}"
-        volume_size: "50"
-        volume_type: gp2
-        iops: "300"
-        instance: "{{ ec2.instance.0.instance_id }}"
-    
+    - set_fact:
+        serverip: "{{ec2.instance.0.public_ip_address}}" 
+
     - name: Waiting for live SSH connection to AWS host
       wait_for:
         host: "{{ ec2.instances.0.public_ip_address }}"

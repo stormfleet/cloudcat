@@ -124,21 +124,21 @@
 # Running things in a detatched screen
 # screen -dmS test bash -c 'echo waiting 5 senconds...; sleep 5; exec bash'
 
-- name: Executing hashcat against hashfile
+- name: Executing a short hashcat run against hashfile
   when: short|default(false)
-  command: "./hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /newvolume/rockyou.txt -r /opt/rules/OneRuleToRuleThemAll.rule -o cracked.txt"
+  command: "{{ shortcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
 
-- name: Executing hashcat against hashfile
+- name: Executing a medium hashcat run against hashfile
   when: medium|default(false)
-  command: "./hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /newvolume/rockyou.txt /newvolume/fav_wordlist.lst -r /opt/rules/OneRuleToRuleThemAll.rule -o cracked.txt"
+  command: "{{ mediumcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
 
-- name: Executing hashcat against hashfile
+- name: Executing a long hashcat run against hashfile
   when: long|default(false)
-  command: "./hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /newvolume/rockyou.txt /newvolume/fav_wordlist.lst /newvolume/crackstation.lst -r /opt/rules/OneRuleToRuleThemAll.rule -o cracked.txt"
+  command: "{{ longcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
 
@@ -147,7 +147,7 @@
 ####
 
 - debug:
-    msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@ {{ ec2.instances.0.public_ip_address }}"
+    msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@{{ serverip }}"
   when: long|medium|default(false)
 
 - name: Cracking complete, reading outfile
