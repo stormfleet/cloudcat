@@ -36,43 +36,21 @@
         group: root
         mode: 0666
 
-      #- name: Blacklisting kernel modules
-      #  blockinfile:
-      #    create: yes
-      #    path: /etc/modprobe.d/blacklist-nouveau.conf
-      #    insertafter: EOF
-      #    block: |
-      #      blacklist nouveau
-      #      blacklist lbm-nouveau
-      #      options nouveau modeset=0
-      #      alias nouveau off
-      #      alias lbm-nouveau off
-      #
-      #- name: Modifying nouveau-kms.conf
-      #  lineinfile:
-      #    create: yes
-      #    path: /etc/modprobe.d/nouveau-kms.conf
-      #    state: present
-      #    insertafter: EOF
-      #    line: "options nouveau modeset=0"
-
 - name: Updating initramfs
   command: "update-initramfs -u"
 
 - name: Checking if reboot is needed...
   block:
-    - lineinfile:
-        path: /etc/modprobe.d/blacklist-nouveau.conf
-        line: "# rebooted"
-        state: present
-      check_mode: yes
+    - command: cat /etc/modprobe.d/blacklist-nouveau.conf
       register: nouveau
     - debug:
         msg: "Moving to reboot now..."
-      when: nouveau.stdout | match("# rebooted")
-
-- name: Rebooting server to apply changes
-  reboot:
+      when: '"# rebooted" not in nouveau.stdout'
+    - reboot:
+      when: '"# rebooted" not in nouveau.stdout'
+    - debug:
+        msg: "Server already booted, skipping reboot"
+      when: nouveau.stdout is match("# rebooted")
 
 ####
 #### Post-reboot: Setting up Hashcat
