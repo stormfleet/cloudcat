@@ -65,7 +65,7 @@
 ### Start of Cracking AWS block
 ###
     - debug:
-        msg: "Secgroup is {{ secgroup.group_id }}"
+        msg: "Secgroup is {{ secgroup }}"
 
     - name: Creating EC2 instance
       ec2_instance:
