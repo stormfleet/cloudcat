@@ -16,11 +16,6 @@
     - external_vars.yml
 
   tasks:
-    - aws_caller_facts:
-        aws_access_key: "{{ access }}"
-        aws_secret_key: "{{ secret }}"
-      register: caller_facts
-    
     - name: Checking public IP address of localhost
       ipify_facts:
       register: ipify
@@ -40,7 +35,7 @@
           - proto: tcp
             from_port: 22
             to_port: 22
-            cidr_ip: "{{ ipify.stdout }}"
+            cidr_ip: "{{ ipify.ansible_facts.ipify_public_ip }}/32"
       register: secgroup
             
     - name: Creating AWS security group with two source IP addresses
@@ -55,11 +50,11 @@
           - proto: tcp
             from_port: 22
             to_port: 22
-            cidr_ip: "{{ ipify.stdout }}"
+            cidr_ip: "{{ ipify.ansible_facts.ipify_public_ip }}/32"
           - proto: tcp
             from_port: 22
             to_port: 22
-            cidr_ip: "{{ guestip }}"
+            cidr_ip: "{{ guestip }}/32"
       register: secgroup
 
 ###
@@ -69,7 +64,9 @@
 ###
 ### Start of Cracking AWS block
 ###
-    
+    - debug:
+        msg: "Secgroup is {{ secgroup.group_id }}"
+
     - name: Creating EC2 instance
       ec2_instance:
         aws_access_key: "{{ access }}"
@@ -91,6 +88,7 @@
         aws_secret_key: "{{ secret }}"
         instance: "{{ ec2.instance.0.instance_id }}"
         volume_size: "50"
+        device_name: /dev/xvdf
         state: present
         region: "{{ region }}"
         snapshot: "{{ wordsnap }}"

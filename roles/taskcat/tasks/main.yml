@@ -40,17 +40,15 @@
   command: "update-initramfs -u"
 
 - name: Checking if reboot is needed...
-  block:
-    - command: cat /etc/modprobe.d/blacklist-nouveau.conf
-      register: nouveau
-    - debug:
-        msg: "Moving to reboot now..."
-      when: '"# rebooted" not in nouveau.stdout'
-    - reboot:
-      when: '"# rebooted" not in nouveau.stdout'
-    - debug:
-        msg: "Server already booted, skipping reboot"
-      when: nouveau.stdout is match("# rebooted")
+  command: cat /etc/modprobe.d/blacklist-nouveau.conf
+  register: nouveau
+
+- reboot:
+  when: '"# rebooted" not in nouveau.stdout'
+
+- debug:
+    msg: "Server already booted, skipping reboot"
+  when: nouveau.stdout is match("# rebooted")
 
 ####
 #### Post-reboot: Setting up Hashcat
