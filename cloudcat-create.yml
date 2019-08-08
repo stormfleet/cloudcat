@@ -36,8 +36,8 @@
             from_port: 22
             to_port: 22
             cidr_ip: "{{ ipify.ansible_facts.ipify_public_ip }}/32"
-      register: secgroup
-            
+        register: secgroup
+    
     - name: Creating AWS security group with two source IP addresses
       when: guestip is defined
       ec2_group:
@@ -55,7 +55,9 @@
             from_port: 22
             to_port: 22
             cidr_ip: "{{ guestip }}/32"
-      register: secgroup
+        register: secgroup
+
+### Current issue - secgroup is being redfined by the second AWS security group creation. Suggested fix for this is comment by ham-360 in #4297 on ansible.
 
 ###
 ### END of security group block
@@ -64,9 +66,6 @@
 ###
 ### Start of Cracking AWS block
 ###
-    - debug:
-        msg: "Secgroup is {{ secgroup }}"
-
     - name: Creating EC2 instance
       ec2_instance:
         aws_access_key: "{{ access }}"
