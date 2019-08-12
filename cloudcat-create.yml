@@ -24,7 +24,7 @@
 # OR
 # Create AWS security group when the localhost is one of x IP addresses that need to access the instance
     - name: Creating AWS security group with one source IP address
-      when: onegroup is defined
+      when: oneip is defined
       ec2_group:
         aws_access_key: "{{ access }}"
         aws_secret_key: "{{ secret }}"
@@ -36,7 +36,7 @@
             from_port: 22
             to_port: 22
             cidr_ip: "{{ ipify.ansible_facts.ipify_public_ip }}/32"
-        register: secgroup
+      register: singlegroup
     
     - name: Creating AWS security group with two source IP addresses
       when: guestip is defined
@@ -55,7 +55,7 @@
             from_port: 22
             to_port: 22
             cidr_ip: "{{ guestip }}/32"
-        register: secgroup
+      register: guestgroup
 
 ### Current issue - secgroup is being redfined by the second AWS security group creation. Suggested fix for this is comment by ham-360 in #4297 on ansible.
 
@@ -72,7 +72,7 @@
         aws_secret_key: "{{ secret }}"
         name: "{{ name }}"
         state: present
-        security_group: "{{ secgroup.group_id  }}"
+        security_group: "{{ guestgroup.group_id | default(singlegroup.group_id) }}"
         image_id: "{{ image }}"
         instance_type: "{{ type }}"
         key_name: "{{ identity }}"
@@ -85,7 +85,7 @@
       ec2_vol:
         aws_access_key: "{{ access }}"
         aws_secret_key: "{{ secret }}"
-        instance: "{{ ec2.instance.0.instance_id }}"
+        instance: "{{ ec2.instances.0.instance_id }}"
         volume_size: "50"
         device_name: /dev/xvdf
         state: present
@@ -94,9 +94,9 @@
         volume_type: "gp2"
 
     - debug:
-        msg: "{{ type }} EC2 instance created. Located at {{ ec2.instance.0.public_ip_address }}"
+        msg: "{{ type }} EC2 instance created. Located at {{ ec2.instances.0.public_ip_address }}"
     - set_fact:
-        serverip: "{{ec2.instance.0.public_ip_address}}" 
+        serverip: "{{ec2.instances.0.public_ip_address}}" 
 
     - name: Waiting for live SSH connection to AWS host
       wait_for:
@@ -109,7 +109,7 @@
       add_host:
         host: "{{ ec2.instances.0.public_ip_address }}"
         group: cloudcat
-        ansible_ssh_private_key_file: "/home/{{ ansible_user_id}}/.ssh/{{ ssh_key_name }}"
+        ansible_ssh_private_key_file: "/home/{{ ansible_user_id}}/.ssh/{{ ssh_key }}"
 
 - hosts: cloudcat
   remote_user: ubuntu
