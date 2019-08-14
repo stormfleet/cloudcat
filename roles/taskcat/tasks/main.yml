@@ -55,7 +55,9 @@
 #### Post-reboot: Setting up Hashcat
 ####
 - name: Reboot successful. Updating info.
+  when: '"rebooted" not in bootstate.stdout'
   lineinfile:
+    create: yes
     path: /root/state.txt
     state: present
     insertafter: EOF
@@ -69,7 +71,7 @@
         mode: '0666'
     - mount:
         path: /newvolume/
-        src: "{{ wordvol }}"
+        src: "{{hostvars['localhost']['wordvol']}}"
         fstype: ext4
         state: mounted
 
@@ -145,7 +147,7 @@
 ####
 
 - debug:
-    msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@{{ serverip }}"
+    msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@{{hostvars['localhost']['serverip']}}"
   when: long|medium|default(false)
 
 - name: Cracking complete, reading outfile

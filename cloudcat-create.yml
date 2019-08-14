@@ -94,8 +94,8 @@
         volume_type: "gp2"
       register: ec2vol
     - set_fact:
-        wordvol: "{{ ec2vol.device }}"
-
+        wordvol: "{{ec2vol.device}}"
+    
     - debug:
         msg: "{{ type }} EC2 instance created. Located at {{ ec2.instances.0.public_ip_address }}"
     - set_fact:
