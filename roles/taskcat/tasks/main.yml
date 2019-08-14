@@ -40,37 +40,37 @@
   command: "update-initramfs -u"
 
 - name: Checking if reboot is needed...
-  command: cat /etc/modprobe.d/blacklist-nouveau.conf
-  register: nouveau
+  command: cat /root/state.txt
+  register: bootstate
+  ignore_errors: true
 
 - reboot:
-  when: '"# rebooted" not in nouveau.stdout'
+  when: '"rebooted" not in bootstate.stdout'
 
 - debug:
     msg: "Server already booted, skipping reboot"
-  when: nouveau.stdout is match("# rebooted")
+  when: '"rebooted" in bootstate.stdout'
 
 ####
 #### Post-reboot: Setting up Hashcat
 ####
 - name: Reboot successful. Updating info.
   lineinfile:
-    path: /etc/modprobe.d/blacklist-nouveau.conf
+    path: /root/state.txt
     state: present
     insertafter: EOF
-    line: "# rebooted"
+    line: "rebooted"
 
 - name: Mounting wordlist volumes.
   block:
     - file:
-        path: /newvolume/
+        path: /newvolume
         state: directory
         mode: '0666'
     - mount:
         path: /newvolume/
-        src: /dev/xvdf
-        opts: bind
-        fstype: none
+        src: "{{ wordvol }}"
+        fstype: ext4
         state: mounted
 
 - name: Downloading Hashcat and NVIDIA drivers

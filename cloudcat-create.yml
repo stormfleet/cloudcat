@@ -4,7 +4,7 @@
   vars:
     access: redactedxxx 
     secret: redactedyyy
-    name: cloudcat-cracker
+    instance_name: cloudcat-cracker
     image: ami-0ee246e709782b1be
     region: regionxxx
     type: typexxx
@@ -70,7 +70,7 @@
       ec2_instance:
         aws_access_key: "{{ access }}"
         aws_secret_key: "{{ secret }}"
-        name: "{{ name }}"
+        name: "{{ instance_name }}"
         state: present
         security_group: "{{ guestgroup.group_id | default(singlegroup.group_id) }}"
         image_id: "{{ image }}"
@@ -92,6 +92,9 @@
         region: "{{ region }}"
         snapshot: "{{ wordsnap }}"
         volume_type: "gp2"
+      register: ec2vol
+    - set_fact:
+        wordvol: "{{ ec2vol.device }}"
 
     - debug:
         msg: "{{ type }} EC2 instance created. Located at {{ ec2.instances.0.public_ip_address }}"
