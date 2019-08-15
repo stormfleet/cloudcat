@@ -57,8 +57,6 @@
             cidr_ip: "{{ guestip }}/32"
       register: guestgroup
 
-### Current issue - secgroup is being redfined by the second AWS security group creation. Suggested fix for this is comment by ham-360 in #4297 on ansible.
-
 ###
 ### END of security group block
 ###

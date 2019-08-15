@@ -88,6 +88,7 @@
         dest: /opt/
         mode: '0666'
 
+# Need to remember state for this activity so that it doesn't re run every time.
 - name: Installing NVIDIA drivers
   command: "/bin/bash NVIDIA-Linux-x86_64-410.104.run --ui=none --no-questions --silent -X"
   args:
