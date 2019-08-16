@@ -76,7 +76,7 @@
         key_name: "{{ identity }}"
         region: "{{ region }}"
         tags:
-          name: "cloudcat"
+          name: "cloudcat-instance"
         wait_timeout: "300"
         wait: true
       register: ec2
@@ -91,6 +91,8 @@
         state: present
         region: "{{ region }}"
         snapshot: "{{ wordsnap }}"
+        tags:
+          name: "cloudcat-wordlist"
         volume_type: "gp2"
       register: ec2vol
     - set_fact:
