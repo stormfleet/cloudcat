@@ -1,3 +1,3 @@
-shortcrack: "screen -dmS hashcat bash -c './hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /words/rockyou.txt -r /words/rules/OneRuleToRuleThemAll.rule -o cracked.txt; exec bash'"
+shortcrack: "./hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /words/rockyou.txt -r /words/rules/OneRuleToRuleThemAll.rule -o cracked.txt"
 mediumcrack: "screen -dmS hashcat bash -c './hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /words/rockyou.txt /words/fav_wordlist -r /words/rules/OneRuleToRuleThemAll.rule -o cracked.txt; exec bash'"
 longcrack: "screen -dmS hashcat bash -c './hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /words/rockyou.txt /words/fav_wordlist /words/crackstation.txt -r /words/rules/OneRuleToRuleThemAll.rule -o cracked.txt; exec bash'"

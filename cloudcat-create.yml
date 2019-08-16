@@ -75,6 +75,8 @@
         instance_type: "{{ type }}"
         key_name: "{{ identity }}"
         region: "{{ region }}"
+        tags:
+          name: "cloudcat"
         wait_timeout: "300"
         wait: true
       register: ec2

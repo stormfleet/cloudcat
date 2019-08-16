@@ -88,11 +88,28 @@
         dest: /opt/
         mode: '0666'
 
-# Need to remember state for this activity so that it doesn't re run every time.
+- name: Checking if NVIDIA drivers need to be installed
+  command: cat /root/state.txt
+  register: nvidiastate
+
 - name: Installing NVIDIA drivers
   command: "/bin/bash NVIDIA-Linux-x86_64-410.104.run --ui=none --no-questions --silent -X"
   args:
     chdir: /opt/
+  when: '"nvidia-installed" not in nvidiastate.stdout'
+
+- name: NVIDIA driver install successful. Updating info.
+  when: '"nvidia-installed" not in nvidiastate.stdout'
+  lineinfile:
+    create: yes
+    path: /root/state.txt
+    state: present
+    insertafter: EOF
+    line: "nvidia-installed"
+
+- debug:
+    msg: "NVIDIA drivers already installed, skipping..."
+  when: '"nvidia-installed" in nvidiastate.stdout'
 
 - name: Extracting Hashcat to /opt/ directory
   unarchive:
@@ -122,23 +139,19 @@
 #### Hashcat exection statements
 ####
 
-# Running things in a detatched screen
-# screen -dmS test bash -c 'echo waiting 5 senconds...; sleep 5; exec bash'
-
 - name: Executing a short hashcat run against hashfile
-  when: short|default(false)
   command: "{{ shortcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
 
 - name: Executing a medium hashcat run against hashfile
-  when: medium|default(false)
+  when: medium is defined
   command: "{{ mediumcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
 
 - name: Executing a long hashcat run against hashfile
-  when: long|default(false)
+  when: long is defined
   command: "{{ longcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
@@ -149,16 +162,16 @@
 
 - debug:
     msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@{{hostvars['localhost']['serverip']}}"
-  when: long|medium|default(false)
+  when: long is defined or
+        medium is defined
 
 - name: Cracking complete, reading outfile
-  when: short|default(false)
   command: "cat /opt/hashcat-5.1.0/cracked.txt"
   register: cracked
 
 - debug:
     msg: "The following hashes were recovered {{ cracked.stdout }}"
-  when: short|default(false)
+  when: short is defined
 
 - debug:
     msg: "Remote execution complete! Returning to local execution..."

@@ -16,12 +16,14 @@
     - external_vars.yml
 
   tasks:
-    - name: Gathering facts from AWS
-      ec2_caller_facts:
+    - name: Gathering EC2 instance information
+      ec2_instance_facts:
         aws_access_key: "{{ access }}"
         aws_secret_key: "{{ secret }}"
-      register: aws_facts
-              
+        region: "{{ region }}"
+        filters:
+          "tag:Name": cloudcat
+
     - name: Destroying EC2 instance
       ec2_instance:
         aws_access_key: "{{ access }}"
