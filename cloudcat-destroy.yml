@@ -22,7 +22,7 @@
         aws_secret_key: "{{ secret }}"
         region: "{{ region }}"
         filters:
-          "tag:name": cloudcat
+          "tag:name": cloudcat-instance
       register: ec2
 
     - name: Destroying EC2 instance
@@ -57,6 +57,9 @@
 
     - debug:
         msg: "Wordlist volume {{ ec2vol.volumes.0.id }} destroyed."
+
+    - debug:
+        msg: "All instances and wordlists destroyed."
 
     - name: Checking for remaining instances
       ec2_instance:
