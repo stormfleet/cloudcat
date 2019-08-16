@@ -62,9 +62,14 @@
         msg: "All instances and wordlists destroyed."
 
     - name: Checking for remaining instances
-      ec2_instance:
+      ec2_instance_facts:
+        aws_access_key: "{{ access }}"
+        aws_secret_key: "{{ secret }}"
+        region: "{{ region }}"
+        filters:
+          "tag:name": cloudcat-instance
       register: remaining
 
     - debug:
-        msg: "{{ remaining. }} instance remaining."
+        msg: "{{ remaining.instances.0.instance_id }} instance(s) remaining."
 
