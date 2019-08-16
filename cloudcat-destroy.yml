@@ -1,0 +1,62 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    access: redactedxxx 
+    secret: redactedyyy
+    instance_name: cloudcat-cracker
+    image: ami-0ee246e709782b1be
+    region: regionxxx
+    type: typexxx
+    ssh_key: sshxxx
+    identity: identityxxx
+    wordsnap: snapxxx
+    #group:
+  vars_files:
+    - external_vars.yml
+
+  tasks:
+    - name: Gathering facts from AWS
+      ec2_caller_facts:
+        aws_access_key: "{{ access }}"
+        aws_secret_key: "{{ secret }}"
+      register: aws_facts
+              
+    - name: Destroying EC2 instance
+      ec2_instance:
+        aws_access_key: "{{ access }}"
+        aws_secret_key: "{{ secret }}"
+        name: "{{ instance_name }}"
+        state: absent
+        image_id: "{{ image }}"
+        instance_type: "{{ type }}"
+        key_name: "{{ identity }}"
+        region: "{{ region }}"
+        wait_timeout: "300"
+        wait: true
+      register: ec2
+
+    - debug:
+        msg: "EC2 instance {{ ec2. }} destroyed."
+
+    - name: Destroying wordlist volume
+      ec2_vol:
+        aws_access_key: "{{ access }}"
+        aws_secret_key: "{{ secret }}"
+        instance: "{{ ec2.instances.0.instance_id }}"
+        volume_size: "50"
+        state: absent
+        region: "{{ region }}"
+        volume_type: "gp2"
+      register: ec2vol
+    
+    - debug:
+        msg: "Wordlist volume {{ ec2vol. }} destroyed."
+
+    - name: Checking for remaining instances
+      ec2_instance:
+      register: remaining
+
+    - debug:
+        msg: "{{ remaining. }} instance remaining."
+

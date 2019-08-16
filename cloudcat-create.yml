@@ -97,7 +97,9 @@
     - debug:
         msg: "{{ type }} EC2 instance created. Located at {{ ec2.instances.0.public_ip_address }}"
     - set_fact:
-        serverip: "{{ec2.instances.0.public_ip_address}}" 
+        serverip: "{{ec2.instances.0.public_ip_address}}"
+    - set_fact:
+        serverid: "{{ec2.instances.0.instance_id}}"
 
     - name: Waiting for live SSH connection to AWS host
       wait_for:
@@ -111,6 +113,20 @@
         host: "{{ ec2.instances.0.public_ip_address }}"
         group: cloudcat
         ansible_ssh_private_key_file: "/home/{{ ansible_user_id}}/.ssh/{{ ssh_key }}"
+
+        #    - name: Adding live hosts to register
+        #      lineinfile:
+        #        state: present
+        #        create: yes
+        #        path: "{{ ansible_env.PWD }}/cloudcats.up"
+        #        line: 'ip: "{{ serverip }}"'
+        #
+        #    - name: Adding live hosts to register
+        #      blockinfile:
+        #        create: yes
+        #        path: "{{ ansible_env.PWD }}/cloudcats.up"
+        #        block: |
+        #          {{ instance_name }} {{ serverip }} {{ serverid }}
 
 - hosts: cloudcat
   remote_user: ubuntu
