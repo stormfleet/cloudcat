@@ -1,4 +1,8 @@
 ---
+- set_fact:
+    hashmode: "{{hostvars['localhost']['hashmode']}}"
+    length: "{{hostvars['localhost']['length']}}"
+
 - name: Updating packages
   apt:
     update_cache: yes
@@ -66,11 +70,11 @@
 - name: Mounting wordlist volumes.
   block:
     - file:
-        path: /newvolume
+        path: /wordvolume
         state: directory
         mode: '0666'
     - mount:
-        path: /newvolume/
+        path: /wordvolume/
         src: "{{hostvars['localhost']['wordvol']}}"
         fstype: ext4
         state: mounted
@@ -140,18 +144,21 @@
 ####
 
 - name: Executing a short hashcat run against hashfile
+  when: length == "short"
   command: "{{ shortcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
+  ignore_errors: true
+  register: shortout
 
 - name: Executing a medium hashcat run against hashfile
-  when: medium is defined
+  when: length == "medium"
   command: "{{ mediumcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
 
 - name: Executing a long hashcat run against hashfile
-  when: long is defined
+  when: length == "long"
   command: "{{ longcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
@@ -160,18 +167,23 @@
 #### End of Hashcat execution statements
 ####
 
+#- debug:
+#    msg:
+#  when: "{{ shortout.changed }} == false"
+    
 - debug:
     msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@{{hostvars['localhost']['serverip']}}"
-  when: long is defined or
-        medium is defined
+  when: length == "medium" or
+        length == "long"
 
 - name: Cracking complete, reading outfile
+  when: length == "short"
   command: "cat /opt/hashcat-5.1.0/cracked.txt"
   register: cracked
 
 - debug:
     msg: "The following hashes were recovered {{ cracked.stdout }}"
-  when: short is defined
+  when: length == "short"
 
 - debug:
     msg: "Remote execution complete! Returning to local execution..."

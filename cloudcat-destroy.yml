@@ -25,6 +25,10 @@
           "tag:name": cloudcat-instance
       register: ec2
 
+    - debug:
+        msg: "EC2 instance {{ ec2.instances.0.instance_id }} at {{ ec2.instances.0.public_ip_address }} will be destroyed."
+      ignore_errors: true
+
     - name: Destroying EC2 instance
       ec2_instance:
         aws_access_key: "{{ access }}"
@@ -35,15 +39,17 @@
         wait_timeout: "300"
         wait: true
       register: ec2
+      ignore_errors: true
 
     - debug:
-        msg: "EC2 instance {{ ec2.instances.0.instance_id }} at {{ ec2.instances.0.public_ip_address }} destroyed."
+        msg: "EC2 instance destroyed."
     
     - name: Gathering volume facts
       ec2_vol_facts:
         aws_access_key: "{{ access }}"
         aws_secret_key: "{{ secret }}"
-        filter:
+        region: "{{ region }}"
+        filters:
           "tag:name": "cloudcat-wordlist"
       register: ec2vol
               
