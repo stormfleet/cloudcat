@@ -2,7 +2,7 @@
 - set_fact:
     hashmode: "{{hostvars['localhost']['hashmode']}}"
     length: "{{hostvars['localhost']['length']}}"
-
+    serverip: "{{hostvars['localhost']['serverip']}}"
 - name: Updating packages
   apt:
     update_cache: yes
@@ -143,7 +143,7 @@
 #### Hashcat exection statements
 ####
 
-- name: Executing a short hashcat run against hashfile
+- name: Executing a short hashcat run against hashfile (rockyou.txt, One Rule to Rule Them All). Please wait...
   when: length == "short"
   command: "{{ shortcrack }}"
   args:
@@ -151,13 +151,13 @@
   ignore_errors: true
   register: shortout
 
-- name: Executing a medium hashcat run against hashfile
+- name: Executing a medium hashcat run against hashfile (rockyou and fav_wordlist, One Rule to Rule Them All) in a screen.
   when: length == "medium"
   command: "{{ mediumcrack }}"
   args:
     chdir: /opt/hashcat-5.1.0
 
-- name: Executing a long hashcat run against hashfile
+- name: Executing a long hashcat run against hashfile (rockyou, fav_wordlist and crackstation, One Rule to Rule Them All) in a screen.
   when: length == "long"
   command: "{{ longcrack }}"
   args:
@@ -172,7 +172,7 @@
 #  when: "{{ shortout.changed }} == false"
     
 - debug:
-    msg: "Medium or long hash cracking mode has been chosen, access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@{{hostvars['localhost']['serverip']}}"
+    msg: "Medium or long hash cracking mode has been chosen. Hashcat was executed in a screen, please access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@{{ serverip }}, and screen -r."
   when: length == "medium" or
         length == "long"
 
