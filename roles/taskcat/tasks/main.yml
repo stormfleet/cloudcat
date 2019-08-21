@@ -45,21 +45,21 @@
 
 - name: Checking if reboot is needed...
   command: cat /root/state.txt
-  register: bootstate
+  register: statetrack
   ignore_errors: true
 
 - reboot:
-  when: '"rebooted" not in bootstate.stdout'
+  when: '"rebooted" not in statetrack.stdout'
 
 - debug:
     msg: "Server already booted, skipping reboot"
-  when: '"rebooted" in bootstate.stdout'
+  when: '"rebooted" in statetrack.stdout'
 
 ####
 #### Post-reboot: Setting up Hashcat
 ####
 - name: Reboot successful. Updating info.
-  when: '"rebooted" not in bootstate.stdout'
+  when: '"rebooted" not in statetrack.stdout'
   lineinfile:
     create: yes
     path: /root/state.txt
@@ -92,18 +92,14 @@
         dest: /opt/
         mode: '0666'
 
-- name: Checking if NVIDIA drivers need to be installed
-  command: cat /root/state.txt
-  register: nvidiastate
-
 - name: Installing NVIDIA drivers
   command: "/bin/bash NVIDIA-Linux-x86_64-410.104.run --ui=none --no-questions --silent -X"
   args:
     chdir: /opt/
-  when: '"nvidia-installed" not in nvidiastate.stdout'
+  when: '"nvidia-installed" not in statetrack.stdout'
 
 - name: NVIDIA driver install successful. Updating info.
-  when: '"nvidia-installed" not in nvidiastate.stdout'
+  when: '"nvidia-installed" not in statetrack.stdout'
   lineinfile:
     create: yes
     path: /root/state.txt
@@ -113,7 +109,7 @@
 
 - debug:
     msg: "NVIDIA drivers already installed, skipping..."
-  when: '"nvidia-installed" in nvidiastate.stdout'
+  when: '"nvidia-installed" in statetrack.stdout'
 
 - name: Extracting Hashcat to /opt/ directory
   unarchive:
@@ -170,15 +166,17 @@
   when: length == "short"
   command: "cat /opt/hashcat-5.1.0/cracked.txt"
   register: cracked
+  ignore_errors: true
 
 - debug:
     msg: "It appears that the hashes provided could not be cracked with the rockyou.txt wordlist. Maybe try again with a longer cracking option?"
-  when: '"No such" in {{ cracked.stderr }}'
+  when: length == "short" and
+        '"No such" in cracked.stderr'
   
 - debug:
     msg: "The following hashes were recovered {{ cracked.stdout }}"
   when: length == "short" and
-        "{{ cracked.stdout }}" is defined
+        cracked.stdout is defined
 
 - debug:
     msg: "Medium or long hash cracking mode has been chosen. Hashcat was executed in a screen, please access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@{{ serverip }}, and screen -r."

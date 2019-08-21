@@ -1,3 +1,3 @@
 shortcrack: "./hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /wordvolume/rockyou.txt -r /wordvolume/rules/oneruletorulethemall.rule -o cracked.txt"
-mediumcrack: "screen -dmS hashcat bash -c './hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /wordvolume/rockyou.txt /wordvolume/fav_wordlist -r /wordvolume/rules/oneruletorulethemall.rule -o cracked.txt; exec bash'"
-longcrack: "screen -dmS hashcat bash -c './hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /wordvolume/rockyou.txt /wordvolume/fav_wordlist /wordvolume/crackstation.txt -r /wordvolume/rules/oneruletorulethemall.rule -o cracked.txt; exec bash'"
+mediumcrack: "screen -dmS hashcat bash -c './hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /wordvolume/rockyou.txt /wordvolume/fav_wordlist.lst -r /wordvolume/rules/oneruletorulethemall.rule -o cracked.txt; exec bash'"
+longcrack: "screen -dmS hashcat bash -c './hashcat -a 0 -m {{ hashmode }} /opt/hashes/hashes.txt /wordvolume/rockyou.txt /wordvolume/fav_wordlist.lst /wordvolume/crackstation.txt -r /wordvolume/rules/oneruletorulethemall.rule -o cracked.txt; exec bash'"
