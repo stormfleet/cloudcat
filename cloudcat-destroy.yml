@@ -74,8 +74,13 @@
         region: "{{ region }}"
         filters:
           "tag:name": cloudcat-instance
+          instance-state-name: [ "shutting-down", "stopping", "stopped", "terminated" ]
       register: remaining
 
     - debug:
         msg: "{{ remaining.instances.0.instance_id }} instance(s) remaining."
+      when: remaining is defined
 
+    - debug:
+        msg: "No instances remaining relating to CloudCat."
+      when: remaining is undefined
