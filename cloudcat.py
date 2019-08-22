@@ -24,7 +24,8 @@ def parse_args():
     parser.add_argument("-f","--file",help="File containing hashes to crack",required=True)
     parser.add_argument("-m","--mode",help="Hashtype cracking mode you want to use",required=True)
     parser.add_argument("-i","--identity",help="SSH identity on AWS to use (only select this if you're sure you have the correct key!)")
-    parser.add_argument("-l","--length",help="Length of the hash cracking run. Short is just rockyou.txt, medium is rockyou and fav_wordlist, and long is those two and crackstation.txt."
+    parser.add_argument("-r","--region",help="AWS region to create the cracking instance in.")
+    parser.add_argument("-l","--length",help="Length of the hash cracking run. Short is just rockyou.txt, medium is rockyou and fav_wordlist, and long is those two and crackstation.txt.")
     parser.add_argument("-g","--single",help="Create an Amazon Security Group where only your current public IP address is allowed through the firewall. You will be unable to SSH to the server from anywhere other than here.",action='store_true')
     parser.add_argument("-o","--double",help="Create an Amazon Security Group where your current pulic IP address and one other public IP address is allowed through the firewall. This second location should be somewhere you always have access to (e.g. home, office).")
     parser.add_argument("-d","--destroy",help="Destroy CloudCat AWS P3.X instances.",action='store_true')
@@ -34,13 +35,14 @@ def main():
     args = parse_args()
     shutil.copyfile(args.file, 'roles/taskcat/files/hashes.txt')
     create = ['ansible-playbook', 'cloudcat-create.yml', '-e']
-    ops = ["type={} hashmode={} ssh_key={} identity={} oneip={} length={} guestip={}".format(args.type,args.mode,args.identity,args.single,args.length,args.double)]
+    ops = ["type={} hashmode={} ssh_key={} identity={} oneip={} length={} guestip={}".format(args.type,args.mode,args.identity,args.identity,args.single,args.length,args.double)]
     if args.destroy:
         destroy = ['ansible-playbook', 'cloudcat-destroy.yml']
-        subprocess.call(arrayd)
+        subprocess.call(destroy)
         sys.exit()
-    array.extend(ops)
-    subprocess.call(create)
+    create.extend(ops)
+    print(create)
+    #subprocess.call(create)
 
 if __name__ == "__main__":
     banner()
