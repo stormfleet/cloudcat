@@ -33,7 +33,8 @@ def parse_args():
     parser.add_argument("--info",help="Print information on Hashcat cracking statistics and AWS P3 instance costs.", action="store_true")
     return parser.parse_args()
 
-info = "foo"
+info = """
+"""
 
 def main():
     args = parse_args()
@@ -57,6 +58,7 @@ def main():
         ops = ["type={} hashmode={} ssh_key={} identity={} oneip={} length={} guestip={}".format(args.type,args.mode,args.identity,args.identity,args.single,args.length,args.double)]
         create.extend(ops)
         print(create)
+        print("Creating CloudCat cracking instance with " + args.type + "accelerated computing instance.")
         #subprocess.call(create)
 
 if __name__ == "__main__":
