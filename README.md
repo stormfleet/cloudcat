@@ -33,8 +33,48 @@ ansible
 ## Usage
 It's still a work in progress, so this is coming!
 
-I'm not sure at the moment if the best thing to do is to create a volume, load it with wordlists, then store it on AWS, or to create the wordlist volume each time the script is run.
-The benefit of the former is the setup time is much faster, however it costs money when cracking instances are not run. Inverse is true of the latter; it's slower to start up but costs no money when not in use.
+```
+./cloudcat.py --help
+
+CloudCat - The cloud-based password cracker.
+        
+usage: cloudcat.py [-h] [-t {p3.2xlarge,p3.8xlarge,p3.16xlarge}] [-f FILE]
+                   [-m MODE] [-i IDENTITY] [-k SSHKEY] [-l LENGTH] [-s]
+                   [--double DOUBLE] [-d] [--info]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t {p3.2xlarge,p3.8xlarge,p3.16xlarge}, --type {p3.2xlarge,p3.8xlarge,p3.16xlarge}
+                        Size of the instance to use. From cheapest to most
+                        expensive: p3.2xlarge, p3.8xlarge and p3.16xlarge.
+  -f FILE, --file FILE  File containing hashes to crack
+  -m MODE, --mode MODE  Hashtype cracking mode you want to use
+  -i IDENTITY, --identity IDENTITY
+                        AWS identity to use (only select this if you're sure
+                        you have the correct key!)
+  -k SSHKEY, --ssh-key SSHKEY
+                        SSH key-file name. Used to connect to created CloudCat
+                        instances to conduct tasks and launch Hashcat.
+  -l LENGTH, --length LENGTH
+                        Length of the hash cracking run. Short is just
+                        rockyou.txt, medium is rockyou and fav_wordlist, and
+                        long is those two and crackstation.txt.
+  -s, --single          Create an Amazon Security Group where only your
+                        current public IP address is allowed through the
+                        firewall. You will be unable to SSH to the server from
+                        anywhere other than here.
+  --double DOUBLE       Create an Amazon Security Group where your current
+                        pulic IP address and one other public IP address is
+                        allowed through the firewall. This second location
+                        should be somewhere you always have access to (e.g.
+                        home, office).
+  -d, --destroy         Destroy CloudCat AWS P3.X instances.
+  --info                Print information on Hashcat cracking statistics and
+                        AWS P3 instance costs.
+
+```
+Currently CloudCat creates an instance, creates a volume from a public snapshot containing the following wordlists. This needs to be improved, as the more wordlists included the better.
+
 ## Coming
 Things that will be coming to CloudCat eventually:
 - Support for multiple simultaneous CloudCat instances
