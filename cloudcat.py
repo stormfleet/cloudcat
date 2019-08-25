@@ -100,6 +100,8 @@ def main():
     if args.type and (args.sshkey is None or args.identity is None or args.file is None or args.mode is None or args.length is None):
         parser = argparse.ArgumentParser()
         parser.error("You have defined an instance type but not additional parameters to create the instance. Exiting...")
+        if args.single and args.double:
+            parser.error("Please select either single-IP security group or double-IP security group creation, not both.")
         sys.exit(0)
     if args.type:
         shutil.copyfile(args.file, 'roles/taskcat/files/hashes.txt')
