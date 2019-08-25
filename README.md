@@ -74,6 +74,11 @@ optional arguments:
 
 ```
 Currently CloudCat creates an instance, creates a volume from a public snapshot containing the following wordlists. This needs to be improved, as the more wordlists included the better.
+```
+rockyou.txt
+fav_wordlist.lst
+crackstation.txt
+```
 
 ## Coming
 Things that will be coming to CloudCat eventually:
