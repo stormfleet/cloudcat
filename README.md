@@ -31,7 +31,6 @@ awscli
 ansible
 ```
 ## Usage
-It's still a work in progress, so this is coming!
 
 ```
 ./cloudcat.py --help
