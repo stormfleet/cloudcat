@@ -3,3 +3,6 @@
 
 # Ignore the external var file
 external_vars.yml
+
+# Ignore hashfile - nothing is stored there but it's only really used for testing
+roles/taskcat/files/hashes.txt
