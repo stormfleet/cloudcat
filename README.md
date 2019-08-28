@@ -94,4 +94,3 @@ Things that will be coming to CloudCat eventually:
 ## Thanks
 Obviously massive thanks to the [Hashcat team](https://github.com/hashcat/hashcat) for the work they do.
 Inspired to create this by the following blog posts on AWS-based password cracking: [1](https://hackernoon.com/20-hours-18-and-11-million-passwords-cracked-c4513f61fdb1),[2](https://medium.com/@lordsaibat/cracking-passwords-with-terraform-and-aws-3685cc918721),[3](https://medium.com/@iraklis/running-hashcat-v4-0-0-in-amazons-aws-new-p3-16xlarge-instance-e8fab4541e9b).
-./cloudcat.py -t p3.2xlarge -f /tmp/foo.txt -m 1000 -i awscat -k awscat -l short -s
