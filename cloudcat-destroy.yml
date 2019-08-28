@@ -43,6 +43,11 @@
 
     - debug:
         msg: "EC2 instance destroyed."
+      when: ec2.instances.0.instance_id is defined
+
+    - debug:
+        msg: "No instances to destroy!"
+      when: ec2.instances.0.instance_id is not defined
     
     - name: Gathering volume facts
       ec2_vol_facts:
@@ -60,12 +65,25 @@
         state: absent
         region: "{{ region }}"
         id: "{{ ec2vol.volumes.0.id }}"
+      ignore_errors: true
 
     - debug:
         msg: "Wordlist volume {{ ec2vol.volumes.0.id }} destroyed."
+      when: ec2vol.volumes.0.id is defined
+
+    - debug:
+        msg: "No wordlist volumes to destroy!"
+      when: ec2vol.volumes.0.id is not defined
 
     - debug:
         msg: "All instances and wordlists destroyed."
+      when: ec2vol.volumes.0.id is defined and
+            ec2.instances.0.instance_id is defined
+
+    - debug:
+        msg: "Nothing destroyed since nothing was there."
+      when: ec2vol.volumes.0.id is not defined and
+            ec2.instances.0.instance_id is not defined
 
     - name: Checking for remaining instances
       ec2_instance_facts:
@@ -79,8 +97,8 @@
 
     - debug:
         msg: "{{ remaining.instances.0.instance_id }} instance(s) remaining."
-      when: remaining is defined
+      when: remaining.instances.0.instance_id is defined
 
     - debug:
         msg: "No instances remaining relating to CloudCat."
-      when: remaining is undefined
+      when: remaining.instances.0.instance_id is not defined
