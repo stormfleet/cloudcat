@@ -90,6 +90,7 @@ Things that will be coming to CloudCat eventually:
 - Robust hash detection to confirm whether hashes are correctly formatted before the instances are brought up (to save money).
 - Better management of active hosts to facilitate destruction
 - Dockerfile support
+- ec2_instance module from ansible is not supported by ansible core - need to migrate to a core supported one so that spot requests are supported.
 ## Thanks
 Obviously massive thanks to the [Hashcat team](https://github.com/hashcat/hashcat) for the work they do.
 Inspired to create this by the following blog posts on AWS-based password cracking: [1](https://hackernoon.com/20-hours-18-and-11-million-passwords-cracked-c4513f61fdb1),[2](https://medium.com/@lordsaibat/cracking-passwords-with-terraform-and-aws-3685cc918721),[3](https://medium.com/@iraklis/running-hashcat-v4-0-0-in-amazons-aws-new-p3-16xlarge-instance-e8fab4541e9b).
