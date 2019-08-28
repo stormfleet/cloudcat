@@ -90,8 +90,14 @@ def main():
         print(info)
         print(hids)
         sys.exit(0)
+    if args.verbose:
+        create = ['ansible-playbook', 'cloudcat-create.yml', '-vvv', '-e']
+    else:
+        create = ['ansible-playbook', 'cloudcat-create.yml', '-e']
     if args.destroy:
         destroy = ['ansible-playbook', 'cloudcat-destroy.yml']
+        if args.verbose:
+            destroy.extend(['-vvv'])
         print("[-] Destroying CloudCat cracking instances...")
         subprocess.call(destroy)
         sys.exit(0)
@@ -101,20 +107,19 @@ def main():
         sys.exit(0)
     if args.type:
         shutil.copyfile(args.file, 'roles/taskcat/files/hashes.txt')
-        if args.verbose:
-            create = ['ansible-playbook', 'cloudcat-create.yml', '-vvv', '-e']
-        else:
-            create = ['ansible-playbook', 'cloudcat-create.yml', '-e']
         ops = ["type={} hashmode={} ssh_key={} identity={} length={}".format(args.type,args.mode,args.sshkey,args.identity,args.length)]
         if args.double:
             ops.extend(["-e guestip={}".format(args.double)])
         else:
             ops.extend(["-e oneip=True"])
         create.extend(ops)
-        print(create)
         print("[+] Creating CloudCat cracking instance with " + args.type + " accelerated computing instance.")
-        #subprocess.call(create)
+        subprocess.call(create)
 	
+#######
+# Begin old code blocks - decommissioned since ansible-runner doesn't support ansible-vault encrypted passwords which need to be decoded at runtime.
+#######
+
 #!/usr/bin/python3
 #import ansible_runner
 #import os
