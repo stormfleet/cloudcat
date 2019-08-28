@@ -37,11 +37,10 @@ ansible
 ```
 ./cloudcat.py --help
 
-CloudCat - The cloud-based password cracker.
-        
 usage: cloudcat.py [-h] [-t {p3.2xlarge,p3.8xlarge,p3.16xlarge}] [-f FILE]
-                   [-m MODE] [-i IDENTITY] [-k SSHKEY] [-l LENGTH] [-s]
-                   [--double DOUBLE] [-d] [--info]
+                   [-m MODE] [-i IDENTITY] [-k SSHKEY]
+                   [-l {short,medium,long}] [--double DOUBLE] [-d] [-v]
+                   [--info]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -56,20 +55,17 @@ optional arguments:
   -k SSHKEY, --ssh-key SSHKEY
                         SSH key-file name. Used to connect to created CloudCat
                         instances to conduct tasks and launch Hashcat.
-  -l LENGTH, --length LENGTH
+  -l {short,medium,long}, --length {short,medium,long}
                         Length of the hash cracking run. Short is just
                         rockyou.txt, medium is rockyou and fav_wordlist, and
                         long is those two and crackstation.txt.
-  -s, --single          Create an Amazon Security Group where only your
-                        current public IP address is allowed through the
-                        firewall. You will be unable to SSH to the server from
-                        anywhere other than here.
   --double DOUBLE       Create an Amazon Security Group where your current
                         pulic IP address and one other public IP address is
                         allowed through the firewall. This second location
                         should be somewhere you always have access to (e.g.
                         home, office).
   -d, --destroy         Destroy CloudCat AWS P3.X instances.
+  -v, --verbose         Add verbosity to CloudCat execution.
   --info                Print information on Hashcat cracking statistics and
                         AWS P3 instance costs.
 
