@@ -6,6 +6,7 @@
 - [Usage](#usage)
 - [Coming](#coming)
 - [Thanks](#thanks)
+- [License](#license)
 
 ## Introduction
 A Python script to create infrastructure to crack passwords for you in the cloud. Under the hood Cloudcat uses an Ansible-base to automate the creation and deletion of AWS's GPU EC2 instances, which make for great crackstations.
@@ -87,6 +88,18 @@ Things that will be coming to CloudCat eventually:
 - Better management of active hosts to facilitate destruction
 - Dockerfile support
 - ec2_instance module from ansible is not supported by ansible core - need to migrate to a core supported one so that spot requests are supported.
+
 ## Thanks
 Obviously massive thanks to the [Hashcat team](https://github.com/hashcat/hashcat) for the work they do.
 Inspired to create this by the following blog posts on AWS-based password cracking: [1](https://hackernoon.com/20-hours-18-and-11-million-passwords-cracked-c4513f61fdb1),[2](https://medium.com/@lordsaibat/cracking-passwords-with-terraform-and-aws-3685cc918721),[3](https://medium.com/@iraklis/running-hashcat-v4-0-0-in-amazons-aws-new-p3-16xlarge-instance-e8fab4541e9b).
+
+## License
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or distribute this software, either in source code form or as a compiled binary, for any purpose, commercial or non-commercial, and by any means.
+
+In jurisdictions that recognize copyright laws, the author or authors of this software dedicate any and all copyright interest in the software to the public domain. We make this dedication for the benefit of the public at large and to the detriment of our heirs and successors. We intend this dedication to be an overt act of relinquishment in perpetuity of all present and future rights to this software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <http://unlicense.org/>
