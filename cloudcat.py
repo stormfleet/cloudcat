@@ -54,7 +54,7 @@ def setup():
     if os.path.isfile('./external_vars.yml') is False and args.setup:
         configure()
     if os.path.isfile('./external_vars.yml') is True and args.setup:
-        while usrchk = input("[?] external_vars.yml file is already configured. Erase and reconfigure (y/n)? ").lower() not in {"y", "n"}:
+        while usrchk = input("[?] external_vars.yml file is already configured. Erase and reconfigure (y/n)? ").lower() not in ["y", "n"]:
             pass
             if usrchk == "y":
                 configure()
