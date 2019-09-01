@@ -28,77 +28,47 @@ def parse_args():
     parser.add_argument("-k","--ssh-key",dest="sshkey",help="SSH key-file name. Used to connect to created CloudCat instances to conduct tasks and launch Hashcat.", action="store")
     parser.add_argument("-l","--length",help="Length of the hash cracking run. Short is just rockyou.txt, medium is rockyou and fav_wordlist, and long is those two and crackstation.txt.",choices=['short','medium','long'], action="store")
     parser.add_argument("--guest-ip",dest="double",help="Create an Amazon Security Group where your current pulic IP address and one other public IP address is allowed through the firewall. This second location should be somewhere you always have access to (e.g. home, office).", action="store")
+    parser.add_argument("--setup",help="Perform CloudCat setup to configure AWS API keys and region.", action="store_true")
     parser.add_argument("-d","--destroy",help="Destroy CloudCat AWS P3.X instances.", action='store_true')
     parser.add_argument("-v","--verbose",help="Add verbosity to CloudCat execution.", action="store_true")
-    parser.add_argument("--info",help="Print information on Hashcat cracking statistics and AWS P3 instance costs.", action="store_true")
     return parser.parse_args()
 
-info = """
-Hashcat statistics for small medium and large P3 instances:
-+-----------------+---------------------+---------------------+----------------------+
-|                 | p3.2xlarge Instance | p3.8xlarge Instance | p3.16xlarge Instance |
-+-----------------+---------------------+---------------------+----------------------+
-| NTLM            | xxxxxx MH/s         | xxxxxx MH/s         | xxxxxx MH/s          |
-+-----------------+---------------------+---------------------+----------------------+
-| NetNTLMv1       | xxxxxx MH/s         | xxxxxx MH/s         | xxxxxx MH/s          |
-+-----------------+---------------------+---------------------+----------------------+
-| NetNTLMv2       | xxxxxx MH/s         | xxxxxx MH/s         | xxxxxx MH/s          |
-+-----------------+---------------------+---------------------+----------------------+
-| Kerberos Type 5 | xxxxxx MH/s         | xxxxxx MH/s         | xxxxxx MH/s          |
-+-----------------+---------------------+---------------------+----------------------+
-
-GPU count for AWS P3 instances:
-+------+----------------+----------------+----------------+
-|      | p3.2xlarge     | p3.8xlarge     | p3.16xlarge    |
-+------+----------------+----------------+----------------+
-| GPUs | NVIDIA V100 x1 | NVIDIA V100 x4 | NVIDIA V100 x8 |
-+------+----------------+----------------+----------------+
-
-Hourly cost for on-demand AWS P3 instances:
-+---------------+------------+------------+-------------+
-|               | p3.2xlarge | p3.8xlarge | p3.16xlarge |
-+---------------+------------+------------+-------------+
-| Cost per Hour | ~$3.589    | ~$14.356   | ~$28.712    |
-+---------------+------------+------------+-------------+
-
+varsample = """
+access: {}
+secret: {}
+region: {}
 """
-hids = """
-Hashcat mode IDs:
-+-------------------------+-----------------+
-|                         | Hashcat mode id |
-+-------------------------+-----------------+
-| MD5                     | 0               |
-+-------------------------+-----------------+
-| SHA1                    | 100             |
-+-------------------------+-----------------+
-| NTLM                    | 1000            |
-+-------------------------+-----------------+
-| NetNTLMv1               | 5500            |
-+-------------------------+-----------------+
-| NetNTLMv2               | 5600            |
-+-------------------------+-----------------+
-| Kerberoasting (KRB5TGS) | 13100           |
-+-------------------------+-----------------+
-"""
+
+def configure():
+    accesskey = input("[?] Enter your AWS Access key for storage in external_vars.yml (encrypted): ")
+    secretkey = input("[?] Enter your AWS Secret Key for storage in external_vars.yml (encrypted): ")
+    region = input("[?] Enter your AWS region for storage in external_vars.yml (encrypted): ")
+    ev = open("external_vars.yml","w+")
+    ev.write("".format(accesskey,secretkey,region))
+    ev.close()
+    subprocess.call(["ansible-vault", "encrypt", "external_vars.yml"])
+    print("[+] Setup complete, CloudCat can now be executed.")
+    sys.exit(0)
+
 def setup():
-    if os.path.isfile('./external_vars.yml') is False:
-        print("[!] Please configure CloudCat with your region and AWS Access and AWS Secret Keys.")
-        sys.exit(0)
-   # accesskey = input("[?] Enter your AWS Access key for storage in external_vars.yml (encrypted): ")
-   # secretkey = input("[?] Enter your AWS Secret Key for storage in external_vars.yml (encrypted): ")
-   # region = input("[?] Enter your AWS region for storage in external_vars.yml (encrypted): ")
-   # ev = open("external_vars.yml","w+")
-   # ev.write("".format(accesskey,secretkey,region))
-   # ev.close()
-   # subprocess.call(["ansible-vault", "encrypt", "external_vars.yml"])
-   print("[+] Setup complete, CloudCat can now be executed.")
-   sys.exit(0)
+    if os.path.isfile('./external_vars.yml') is False and args.setup:
+        configure()
+    if os.path.isfile('./external_vars.yml') is True and args.setup:
+        while usrchk = input("[?] external_vars.yml file is already configured. Erase and reconfigure (y/n)? ").lower() not in {"y", "n"}:
+            pass
+            if usrchk == "y":
+                configure()
+            else:
+                print("[!] Exiting...")
+                sys.exit(0)
 
 def main():
     args = parse_args()
-    if args.info:
-        print(info)
-        print(hids)
+    if args.setup:
+        configure()
+        sys.exit(0)
+    if os.path.isfile('./external_vars.yml') is False:
+        print("[!] Please configure CloudCat with your region and AWS Access and AWS Secret Keys, './cloudcat.py --setup'.")
         sys.exit(0)
     if args.verbose:
         create = ['ansible-playbook', 'cloudcat-create.yml', '-vvv', '-e']
@@ -148,5 +118,4 @@ def main():
 
 if __name__ == "__main__":
     banner()
-    setup()
     main()
