@@ -90,6 +90,9 @@ def setup():
    # ev = open("external_vars.yml","w+")
    # ev.write("".format(accesskey,secretkey,region))
    # ev.close()
+   # subprocess.call(["ansible-vault", "encrypt", "external_vars.yml"])
+   print("[+] Setup complete, CloudCat can now be executed.")
+   sys.exit(0)
 
 def main():
     args = parse_args()
