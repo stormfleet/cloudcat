@@ -13,9 +13,9 @@ A Python script to create infrastructure to crack passwords for you in the cloud
 
 Building and maintaing your own crackstation is fun, but can be seriously expensive, and time consuming. If you're penetration testing or red teaming and you've captured some NTLMv2 hashes or an SPN, sometimes you need results quick.
 
-If you can afford your own beefy crackstation then that's no problem - but if you can't justify purchasing a proper one then AWS is a great alternative. Enhanced computing EC2 instances have really fast GPUs, which are unsurprisingly ideal for cracking hashes. Here are some stats for the 3 EC2 instances supported by CloudCat.
+If you can afford your own beefy crackstation then that's no problem - but if you can't justify purchasing a proper one then AWS is a great alternative. Enhanced computing EC2 instances have really fast GPUs, which are unsurprisingly ideal for cracking hashes. Here are some stats for the 3 EC2 instances supported by CloudCat:
 
-| Hashtype     | NVIDIA V100 MH/s |
+| Hashtype     | NVIDIA V100 MH/s x1 |
 | ------------ | ---------------- |
 | NTLM         |  77704.4 MH/s |
 | NetNTLMv1    |  44172.1 MH/s |
@@ -24,6 +24,12 @@ If you can afford your own beefy crackstation then that's no problem - but if yo
 | Kerberos 5 TGS-REP | 996.0 MH/S |
 
 [Here](benchmark.md) is a full benchmark for all Hashcat hashtypes on a p3.2xlarge instance. p3.8x and p3.16xlarge instances use 4 and 8 of the NVIDIA V100 GPUs respectively, so the increase in cracking power is linear.
+
+| Instance | # of NVIDIA V100s |
+| -------- | ----------------- |
+| p3.2xlarge | x1 |
+| p3.8xlarge | x4 |
+| p3.16xlarge | x8 |
 
 tl;dr: Don't have the money or can't be bothered to maintain your own crackstation? Have some cash to spare? Want creds quickly? Automate cracking in the cloud and free up time to continue pentesting.
 
@@ -80,7 +86,7 @@ optional arguments:
 ```
 Example usage: ./cloudcat.py -t p3.2xlarge -f /tmp/foo.txt -m 1000 -i awscat -k awscat -l short -s
 
-A full list of Hashcat hashtypes is available [here](https://hashcat.net/wiki/doku.php?id=example_hashes)
+A full list of Hashcat hashtypes is available [here](https://hashcat.net/wiki/doku.php?id=example_hashes).
 
 Currently CloudCat creates an instance, creates a volume from a public snapshot containing the following wordlists. This needs to be improved, as the more wordlists included the better.
 ```
