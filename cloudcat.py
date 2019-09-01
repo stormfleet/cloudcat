@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument("-i","--identity",help="AWS identity to use (only select this if you're sure you have the correct key!)", action="store")
     parser.add_argument("-k","--ssh-key",dest="sshkey",help="SSH key-file name. Used to connect to created CloudCat instances to conduct tasks and launch Hashcat.", action="store")
     parser.add_argument("-l","--length",help="Length of the hash cracking run. Short is just rockyou.txt, medium is rockyou and fav_wordlist, and long is those two and crackstation.txt.",choices=['short','medium','long'], action="store")
-    parser.add_argument("--double",help="Create an Amazon Security Group where your current pulic IP address and one other public IP address is allowed through the firewall. This second location should be somewhere you always have access to (e.g. home, office).", action="store")
+    parser.add_argument("--guest-ip",dest="double",help="Create an Amazon Security Group where your current pulic IP address and one other public IP address is allowed through the firewall. This second location should be somewhere you always have access to (e.g. home, office).", action="store")
     parser.add_argument("-d","--destroy",help="Destroy CloudCat AWS P3.X instances.", action='store_true')
     parser.add_argument("-v","--verbose",help="Add verbosity to CloudCat execution.", action="store_true")
     parser.add_argument("--info",help="Print information on Hashcat cracking statistics and AWS P3 instance costs.", action="store_true")
@@ -80,12 +80,19 @@ Hashcat mode IDs:
 | Kerberoasting (KRB5TGS) | 13100           |
 +-------------------------+-----------------+
 """
-
-def main():
-    args = parse_args()
+def setup():
     if os.path.isfile('./external_vars.yml') is False:
         print("[!] Please configure CloudCat with your region and AWS Access and AWS Secret Keys.")
         sys.exit(0)
+   # accesskey = input("[?] Enter your AWS Access key for storage in external_vars.yml (encrypted): ")
+   # secretkey = input("[?] Enter your AWS Secret Key for storage in external_vars.yml (encrypted): ")
+   # region = input("[?] Enter your AWS region for storage in external_vars.yml (encrypted): ")
+   # ev = open("external_vars.yml","w+")
+   # ev.write("".format(accesskey,secretkey,region))
+   # ev.close()
+
+def main():
+    args = parse_args()
     if args.info:
         print(info)
         print(hids)
@@ -138,4 +145,5 @@ def main():
 
 if __name__ == "__main__":
     banner()
+    setup()
     main()
