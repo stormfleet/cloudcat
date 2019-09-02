@@ -20,10 +20,10 @@ CloudCat - The cloud-based password cracker.
         """)
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Example usage: ./cloudcat.py -t p3.2xlarge -f /path/to/hashes.txt -m 1000 -i aws-id -k ssh-keyname -l short")
     parser.add_argument("-t","--type",help="Size of the instance to use. From cheapest to most expensive: p3.2xlarge, p3.8xlarge and p3.16xlarge.",choices=['p3.2xlarge','p3.8xlarge','p3.16xlarge'], action="store")
     parser.add_argument("-f","--file",help="File containing hashes to crack", action="store")
-    parser.add_argument("-m","--mode",help="Hashtype cracking mode you want to use", action="store")
+    parser.add_argument("-m","--mode",help="Hashtype cracking mode you want to use",type=int, action="store")
     parser.add_argument("-i","--identity",help="AWS identity to use (only select this if you're sure you have the correct key!)", action="store")
     parser.add_argument("-k","--ssh-key",dest="sshkey",help="SSH key-file name. Used to connect to created CloudCat instances to conduct tasks and launch Hashcat.", action="store")
     parser.add_argument("-l","--length",help="Length of the hash cracking run. Short is just rockyou.txt, medium is rockyou and fav_wordlist, and long is those two and crackstation.txt.",choices=['short','medium','long'], action="store")
@@ -44,7 +44,7 @@ def configure():
     secretkey = input("[?] Enter your AWS Secret Key for storage in external_vars.yml (encrypted): ")
     region = input("[?] Enter your AWS region for storage in external_vars.yml (encrypted): ")
     ev = open("external_vars.yml","w+")
-    ev.write("".format(accesskey,secretkey,region))
+    ev.write(varsample.format(accesskey,secretkey,region))
     ev.close()
     print("[+] AWS keys and region written to file. Encrypting external_vars.yml with ansible-vault...")
     subprocess.call(["ansible-vault", "encrypt", "external_vars.yml"])
@@ -97,26 +97,6 @@ def main():
         print("[+] Creating CloudCat cracking instance with " + args.type + " accelerated computing instance.")
         subprocess.call(create)
 	
-#######
-# Begin old code blocks - decommissioned since ansible-runner doesn't support ansible-vault encrypted passwords which need to be decoded at runtime.
-#######
-
-#!/usr/bin/python3
-#import ansible_runner
-#import os
-#cwd = os.getcwd()
-#ansible_runner.run(playbook=cwd + '/test-yaml.yml', cmdline='--vault-id @prompt', extravars={'foo':'one','bar':'two','baz':'three'})
-#
-#!/usr/bin/python3
-#import ansible_runner
-#r = ansible_runner.run(private_data_dir='/tmp/demo', playbook='/home/user/dev/cloudcat/creation.yml')
-#print("{}: {}".format(r.status, r.rc))
-# successful: 0
-#for each_host_event in r.events:
-#    print(each_host_event['event'])
-#print("Final status:")
-#print(r.stats)
-
 if __name__ == "__main__":
     banner()
     main()
