@@ -50,11 +50,13 @@ ansible
 
 ```
 ./cloudcat.py --help
-
 usage: cloudcat.py [-h] [-t {p3.2xlarge,p3.8xlarge,p3.16xlarge}] [-f FILE]
                    [-m MODE] [-i IDENTITY] [-k SSHKEY]
-                   [-l {short,medium,long}] [--double DOUBLE] [-d] [-v]
-                   [--info]
+                   [-l {short,medium,long}] [--guest-ip DOUBLE] [--setup] [-d]
+                   [-v]
+
+Example usage: ./cloudcat.py -t p3.2xlarge -f /path/to/hashes.txt -m 1000 -i
+aws-id -k ssh-keyname -l short
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -73,16 +75,15 @@ optional arguments:
                         Length of the hash cracking run. Short is just
                         rockyou.txt, medium is rockyou and fav_wordlist, and
                         long is those two and crackstation.txt.
-  --double DOUBLE       Create an Amazon Security Group where your current
+  --guest-ip DOUBLE     Create an Amazon Security Group where your current
                         pulic IP address and one other public IP address is
                         allowed through the firewall. This second location
                         should be somewhere you always have access to (e.g.
                         home, office).
+  --setup               Perform CloudCat setup to configure AWS API keys and
+                        region.
   -d, --destroy         Destroy CloudCat AWS P3.X instances.
   -v, --verbose         Add verbosity to CloudCat execution.
-  --info                Print information on Hashcat cracking statistics and
-                        AWS P3 instance costs.
-
 ```
 Example usage: ./cloudcat.py -t p3.2xlarge -f /tmp/foo.txt -m 1000 -i awscat -k awscat -l short -s
 
