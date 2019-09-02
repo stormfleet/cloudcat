@@ -1,7 +1,0 @@
-wordsnap: snapID
-identity: ID
-ssh_key: 
-type: p3.2xlarge 
-region: eu-west-2
-access: 
-secret: 

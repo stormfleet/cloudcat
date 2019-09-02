@@ -46,14 +46,15 @@ def configure():
     ev = open("external_vars.yml","w+")
     ev.write("".format(accesskey,secretkey,region))
     ev.close()
+    print("[+] AWS keys and region written to file. Encrypting external_vars.yml with ansible-vault...")
     subprocess.call(["ansible-vault", "encrypt", "external_vars.yml"])
     print("[+] Setup complete, CloudCat can now be executed.")
     sys.exit(0)
 
 def setup():
-    if os.path.isfile('./external_vars.yml') is False and args.setup:
+    if os.path.isfile('./external_vars.yml') is False:
         configure()
-    if os.path.isfile('./external_vars.yml') is True and args.setup:
+    if os.path.isfile('./external_vars.yml') is True:
         usrchk = input("[?] external_vars.yml file is already configured. Erase and reconfigure (y/n)? ")
         while usrchk.lower() not in {"y", "n"}:
             usrchk = input("[?] Please enter y/n: ")
@@ -66,8 +67,7 @@ def setup():
 def main():
     args = parse_args()
     if args.setup:
-        configure()
-        sys.exit(0)
+        setup()
     if os.path.isfile('./external_vars.yml') is False:
         print("[!] Please configure CloudCat with your region and AWS Access and AWS Secret Keys, './cloudcat.py --setup'.")
         sys.exit(0)
