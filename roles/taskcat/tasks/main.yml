@@ -3,6 +3,8 @@
     hashmode: "{{hostvars['localhost']['hashmode']}}"
     length: "{{hostvars['localhost']['length']}}"
     serverip: "{{hostvars['localhost']['serverip']}}"
+    sshkey: "{{hostvars['localhost']['ssh_key']}}"
+
 - name: Updating packages
   apt:
     update_cache: yes
@@ -47,6 +49,10 @@
   command: cat /root/state.txt
   register: statetrack
   ignore_errors: true
+
+- debug:
+    msg: "Rebooting the server now, please wait..."
+  when: '"rebooted" not in statetrack.stdout'
 
 - reboot:
   when: '"rebooted" not in statetrack.stdout'
@@ -171,7 +177,7 @@
 - debug:
     msg: "It appears that the hashes provided could not be cracked with the rockyou.txt wordlist. Maybe try again with a longer cracking option?"
   when: length == "short" and
-        '"No such" in cracked.stderr'
+        cracked.stdout is undefined
   
 - debug:
     msg: "The following hashes were recovered {{ cracked.stdout }}"
@@ -179,7 +185,13 @@
         cracked.stdout is defined
 
 - debug:
-    msg: "Medium or long hash cracking mode has been chosen. Hashcat was executed in a screen, please access the server to check on cracking progress with: ssh -i ~/.ssh/your-key-here ubuntu@{{ serverip }}, and screen -r."
+    msg: "Cracking run has completed, you can either destroy the instance with ./cloudcat.py --destroy, or use it for more cracking."
+  when: length == "short" and
+        cracked.stdout is defined or
+        cracked.stdout is undefined
+
+- debug:
+    msg: "Medium or long hash cracking mode has been chosen. Hashcat was executed in a screen, please access the server to check on cracking progress with: ssh -i ~/.ssh/{{ sshkey }} ubuntu@{{ serverip }}, and sudo screen -r."
   when: length == "medium" or
         length == "long"
 

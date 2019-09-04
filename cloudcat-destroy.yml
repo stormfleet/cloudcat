@@ -29,6 +29,23 @@
         msg: "EC2 instance {{ ec2.instances.0.instance_id }} at {{ ec2.instances.0.public_ip_address }} will be destroyed."
       ignore_errors: true
 
+# Looping block sample
+#    - name: Destroying EC2 instance
+#      ec2_instance:
+#        aws_access_key: "{{ access }}"
+#        aws_secret_key: "{{ secret }}"
+#        state: absent
+#        instance_ids: "{{ item }}"
+#        region: "{{ region }}"
+#        wait_timeout: "300"
+#        wait: true
+#      register: ec2
+#      ignore_errors: true
+#      loop:
+#        - {{ ec2.instances.0.instance_id }}
+#        - {{ ec2.instances.1.instance_id }}
+#        - {{ ec2.instances.2.instance_id }}
+
     - name: Destroying EC2 instance
       ec2_instance:
         aws_access_key: "{{ access }}"
