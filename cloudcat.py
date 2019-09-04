@@ -16,7 +16,8 @@ def banner():
 |     |_ |       ||       ||       ||       ||     |_ |   _   |  |   |  
 |_______||_______||_______||_______||______| |_______||__| |__|  |___|
 
-CloudCat - The cloud-based password cracker.
+              CloudCat - The cloud-based password cracker.
+                  www.github.com/stormfleet/cloudcat
         """)
 
 def parse_args():
@@ -66,6 +67,7 @@ def setup():
 
 def main():
     args = parse_args()
+    parser = argparse.ArgumentParser()
     if args.setup:
         setup()
     if os.path.isfile('./external_vars.yml') is False:
@@ -76,6 +78,9 @@ def main():
     else:
         create = ['ansible-playbook', 'cloudcat-create.yml', '-e']
     if args.destroy:
+        if args.destroy and args.type:
+            parser.error("[!] You can't destroy and create infrastructure at the same time!")
+            sys.exit(0)
         destroy = ['ansible-playbook', 'cloudcat-destroy.yml']
         if args.verbose:
             destroy.extend(['-vvv'])
@@ -83,7 +88,6 @@ def main():
         subprocess.call(destroy)
         sys.exit(0)
     if args.type and (args.sshkey is None or args.identity is None or args.file is None or args.mode is None or args.length is None):
-        parser = argparse.ArgumentParser()
         parser.error("[!] You have defined an instance type but not additional parameters to create the instance. Exiting...")
         sys.exit(0)
     if args.type:
