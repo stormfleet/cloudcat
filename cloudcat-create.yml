@@ -2,16 +2,9 @@
 - hosts: localhost
   connection: local
   vars:
-    access: redactedxxx 
-    secret: redactedyyy
     instance_name: cloudcat-cracker
     image: ami-0ee246e709782b1be
     region: regionxxx
-    type: typexxx
-    ssh_key: sshxxx
-    identity: identityxxx
-    wordsnap: snapxxx
-    #group:
   vars_files:
     - external_vars.yml
 

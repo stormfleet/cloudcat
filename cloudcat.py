@@ -23,9 +23,9 @@ def banner():
 def parse_args():
     parser = argparse.ArgumentParser(description="Example usage: ./cloudcat.py -t p3.2xlarge -f /path/to/hashes.txt -m 1000 -i aws-id -k ssh-keyname -l short")
     parser.add_argument("-t","--type",help="Size of the instance to use. From cheapest to most expensive: p3.2xlarge, p3.8xlarge and p3.16xlarge.",choices=['p3.2xlarge','p3.8xlarge','p3.16xlarge'], action="store")
-    parser.add_argument("-f","--file",help="File containing hashes to crack", action="store")
-    parser.add_argument("-m","--mode",help="Hashtype cracking mode you want to use",type=int, action="store")
-    parser.add_argument("-i","--identity",help="AWS identity to use (only select this if you're sure you have the correct key!)", action="store")
+    parser.add_argument("-f","--file",help="File containing hashes to crack.", action="store")
+    parser.add_argument("-m","--mode",help="Hashtype cracking mode you want to use. This should correspond to the modes listed on Hashcat's website.",type=int, action="store")
+    parser.add_argument("-i","--identity",help="AWS identity to use (only select this if you're sure you have the correct key!).", action="store")
     parser.add_argument("-k","--ssh-key",dest="sshkey",help="SSH key-file name. Used to connect to created CloudCat instances to conduct tasks and launch Hashcat.", action="store")
     parser.add_argument("-l","--length",help="Length of the hash cracking run. Short is just rockyou.txt, medium is rockyou and fav_wordlist, and long is those two and crackstation.txt.",choices=['short','medium','long'], action="store")
     parser.add_argument("--guest-ip",dest="double",help="Create an Amazon Security Group where your current pulic IP address and one other public IP address is allowed through the firewall. This second location should be somewhere you always have access to (e.g. home, office).", action="store")
@@ -38,14 +38,16 @@ varsample = """
 access: {}
 secret: {}
 region: {}
+wordsnap: {}
 """
 
 def configure():
     accesskey = input("[?] Enter your AWS Access key for storage in external_vars.yml (encrypted): ")
     secretkey = input("[?] Enter your AWS Secret Key for storage in external_vars.yml (encrypted): ")
     region = input("[?] Enter your AWS region for storage in external_vars.yml (encrypted): ")
+    wordsnap = input("[?] Enter your AWS wordlist snapshot (if you have one), e.g. snap-fa019v0a.. for storage in external_vars.yml: ")
     ev = open("external_vars.yml","w+")
-    ev.write(varsample.format(accesskey,secretkey,region))
+    ev.write(varsample.format(accesskey,secretkey,region,wordsnap))
     ev.close()
     print("[+] AWS keys and region written to file. Encrypting external_vars.yml with ansible-vault...")
     subprocess.call(["ansible-vault", "encrypt", "external_vars.yml"])
