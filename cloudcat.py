@@ -88,6 +88,7 @@ def main():
             destroy.extend(['-vvv'])
         print("[-] Destroying CloudCat cracking instances...")
         subprocess.call(destroy)
+        print("[-] Instance destroyed. Might want to double check on the AWS console!")
         sys.exit(0)
     if args.type and (args.sshkey is None or args.identity is None or args.file is None or args.mode is None or args.length is None):
         parser.error("[!] You have defined an instance type but not additional parameters to create the instance. Exiting...")

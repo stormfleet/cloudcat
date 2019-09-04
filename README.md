@@ -35,6 +35,8 @@ tl;dr: Don't have the money or can't maintain your own crackstation? Have some c
 
 There isn't full support for simultaneous cracking instances at the moment - it's coming though. Also need support for creating your own wordlist snapshots - I've been using my own but I'll buld it into the script.
 
+A word of warning too for the time being - the destroy script doesn't take notice of multiple instances, so you might want to check your AWS Console to be doubly sure the instance has terminated correctly!
+
 ## Installation
 Cloudcat requires the following Python dependencies:
 ```
